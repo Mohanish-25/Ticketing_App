@@ -1,8 +1,9 @@
+import { useEffect, useState } from 'react';
 import EditTicketForm from "@/app/(components)/EditTicketForm";
 
 const getTicketById = async (id) => {
   try {
-    const res = await fetch(`http://localhost:3000/api/Tickets/${id}`, {
+    const res = await fetch(`https://ticketingapp253.vercel.app/api/Tickets/${id}`, {
       cache: "no-store",
     });
 
@@ -16,20 +17,24 @@ const getTicketById = async (id) => {
   }
 };
 
-let updateTicketData = {};
-const TicketPage = async ({ params }) => {
+const TicketPage = ({ params }) => {
+  const [updateTicketData, setUpdateTicketData] = useState(null);
   const EDITMODE = params.id === "new" ? false : true;
 
-  if (EDITMODE) {
-    updateTicketData = await getTicketById(params.id);
-    updateTicketData = updateTicketData.foundTicket;
-  } else {
-    updateTicketData = {
-      _id: "new",
-    };
-  }
+  useEffect(() => {
+    if (EDITMODE) {
+      getTicketById(params.id).then(data => {
+        setUpdateTicketData(data.foundTicket);
+      });
+    }
+  }, [params.id]);
 
-  return <EditTicketForm ticket={updateTicketData} />;
+  // Render the EditTicketForm component with the fetched data
+  return (
+    <div>
+      {updateTicketData && <EditTicketForm data={updateTicketData} />}
+    </div>
+  );
 };
 
 export default TicketPage;
